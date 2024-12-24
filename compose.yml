@@ -1,0 +1,30 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.5
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=password
+      - KC_CACHE=ispn
+      - KC_CACHE_STACK=tcp
+      - KC_CACHE_REMOTE_USERNAME=admin
+      - KC_CACHE_REMOTE_PASSWORD=password
+      - KC_CACHE_REMOTE_HOST=infinispan
+      - KC_CACHE_REMOTE_PORT=11222
+      - KC_CACHE_REMOTE_TLS_ENABLED=false
+    ports:
+      - "18080:8080"
+    entrypoint: ["/opt/keycloak/bin/kc.sh", "start-dev", "--cache=ispn", "--cache-stack=tcp"]
+    volumes:
+      - ./data/keycloak-data:/opt/keycloak/data
+
+  infinispan:
+    # refs: https://infinispan.org/download/stable/native-image.html
+    image: quay.io/infinispan/server-native:15.1.1.Final-1
+    ports:
+      - "11222:11222"
+    environment:
+      - USER="admin" 
+      - PASS="password"
+    command:
+      - --cluster-name=ISPN -Dlog4j2.debug=true -Dorg.infinispan.SERVER=DEBUG
+
